@@ -25,8 +25,9 @@ fn main() -> Result<()> {
     let config = CircuitConfig::standard_recursion_config();
     let mut builder = CircuitBuilder::<F, D>::new(config);
 
+    /////// start arithmetic
     // The arithmetic circuit.
-    let m = 2;
+    let m = 20;
     let mut a = Vec::<Vec<Target>>::new();
     let mut b = Vec::<Vec<Target>>::new();
     let mut c = Vec::<Vec<Target>>::new();
@@ -59,24 +60,29 @@ fn main() -> Result<()> {
             builder.register_public_input(c[i][j]);
         }
     }
+    /////// end arithmetic
     
+    /////// start build
     // Build the circuit without actually calculating the result.
     let data = builder.build::<C>();
+    /////// end build
 
+    /////// start prove
     let mut pw = PartialWitness::new();
-    //let mut rand = ChaChaRng::from_entropy();
-    let inputs: Vec<Vec<Vec<u32>>> = vec![vec![vec![1, 2], vec![3, 4]], vec![vec![5, 6], vec![7, 8]]];
+    let mut rand = ChaChaRng::from_entropy();
+    //let inputs: Vec<Vec<Vec<u32>>> = vec![vec![vec![1, 2], vec![3, 4]], vec![vec![5, 6], vec![7, 8]]];
     for i in 0..m {
         for j in 0..m {
-            //pw.set_target(a[i][j], F::from_canonical_u32(rand.gen_range(u32::MIN..u32::MAX)));
-            pw.set_target(a[i][j], F::from_canonical_u32(inputs[0][i][j]));
-            //pw.set_target(b[i][j], F::from_canonical_u32(rand.gen_range(u32::MIN..u32::MAX)));
-            pw.set_target(b[i][j], F::from_canonical_u32(inputs[1][i][j]));
+            pw.set_target(a[i][j], F::from_canonical_u32(rand.gen_range(u32::MIN..u32::MAX)));
+            //pw.set_target(a[i][j], F::from_canonical_u32(inputs[0][i][j]));
+            pw.set_target(b[i][j], F::from_canonical_u32(rand.gen_range(u32::MIN..u32::MAX)));
+            //pw.set_target(b[i][j], F::from_canonical_u32(inputs[1][i][j]));
         }    
     }    
     
     // Construct the proof.
     let proof = data.prove(pw)?;
+    //////// end prove
 
     // Show the proof.
     println!("length of proof.public_inputs is {}", proof.public_inputs.len());
@@ -95,6 +101,8 @@ fn main() -> Result<()> {
     println!("C should equals A * B");
     */
     
+    //////// start verify
     // Verify the proof.
     data.verify(proof)
+    //////// end verify
 }
